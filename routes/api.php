@@ -18,13 +18,14 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-// Route::post('/register', [AuthController::class, 'register']);
+Route::post('/user', function (Request $request) {
+    return "Yes";
+});
 
 Route::group([
     'prefix' => 'auth'
 ], function () {
     Route::post('login', 'Auth\AuthController@login');
-
 
     Route::post('register', 'Auth\AuthController@register');
 
