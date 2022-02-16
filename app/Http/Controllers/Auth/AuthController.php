@@ -59,18 +59,19 @@ class AuthController extends Controller
     public function login(Request $request){
 
         $validator = Validator::make($request->all(),[
-            'email' => 'required',
-            'password' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'remember' => 'boolean'
         ]);
 
         if($validator->fails()){
-            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 400);
+            return $this->errorResponseWithDetails('Validation failed!', $validator->errors(), 200);
         }
 
         $credentials = request(['email', 'password']);
 
         if(!Auth::attempt($credentials)){
-            return $this->errorResponseWithDetails('Invalid login credentials', $validator->errors(), 401);
+            return $this->errorResponseWithDetails('Login Failed!', 'Incorrect email or password', 200);
         }
 
         $user = $request->user();
@@ -79,16 +80,16 @@ class AuthController extends Controller
 
         $token = $tokenResult->token;
 
-        if ($request->remember_me)
+        if ($request->remember)
             $token->expires_at = Carbon::now()->addWeeks(1);
 
         $token->save();
 
         $message = "Login Successful!";
 
-        return $this->successResponse(['user' => $user,  'access_token' => $tokenResult->accessToken,
-        'token_type' => 'Bearer',
-        'expires_at' => Carbon::parse(
+        return $this->successResponse(['user' => $user,  'token' => $tokenResult->accessToken,
+        'type' => 'Bearer',
+        'expiry' => Carbon::parse(
             $tokenResult->token->expires_at
         )->toDateTimeString()], $message);
     }
