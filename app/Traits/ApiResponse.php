@@ -46,7 +46,8 @@ trait ApiResponse
                                 'code' => $code,
                                 'status' => $status,
                                 'message' => $message,
-                                'errors' => array_values(collect($errors)->all())
+                                'errors' => $errors,
+                                // 'errors' => array_values(collect($errors)->all())
                             ],
                             $code
                         );

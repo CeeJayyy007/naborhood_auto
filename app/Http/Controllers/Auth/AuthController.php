@@ -26,17 +26,30 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-            $validator = Validator::make($request->all(),[
+        $msgs = [
+            'name.required' => 'Name can not be empty!',
+            'name.max' => 'Name can not be more than 255 characters!',
+            'email.required_without' => 'Email address can not be empty!',
+            'email.email' => 'Email address is invalid!',
+            'email.max' => 'Email address can not be more than 255 characters!',
+            'email.unique' => 'Email address already exists. Please, provide another!',
+            'phone.unique' => 'Phone number already exists. Please, provide another!',
+            'phone.required' => 'Phone number can not be empty!',
+            'phone.numeric' => 'Phone number can be numbers only!',
+            'phone.min' => 'Phone number can not be less than 11 characters!',
+        ];    
+        
+        $validator = Validator::make($request->all(),[
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|numeric|min:11|unique:users',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|min:6',
-        ]);
+        ], $msgs);
 
 
         if($validator->fails()){
-            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 400);
+            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
         }
 
         $user = User::create([
@@ -97,10 +110,13 @@ class AuthController extends Controller
     public function logout(Request $request){
         $request->user()->token()->revoke();
         
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+        // return response()->json([
+        //     'message' => 'Successfully logged out'
+        // ]);
         
+        $message = 'Successfully logged out';
+
+        return $this->successResponse([], $message);
     }
 }
 
