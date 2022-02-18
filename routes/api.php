@@ -18,9 +18,6 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::post('/user', function (Request $request) {
-    return "Yes";
-});
 
 Route::group([
     'prefix' => 'auth'
@@ -33,7 +30,7 @@ Route::group([
       'middleware' => 'auth:api'
     ], function() {
         Route::get('logout', 'Auth\AuthController@logout');
-        Route::get('user', 'AuthController@user');
+        Route::post('edit-profile', 'UserController@editProfile');
     });
     Route::get('/home', 'HomeController@index')->name('home');
 });

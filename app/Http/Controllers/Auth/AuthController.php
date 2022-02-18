@@ -45,7 +45,7 @@ class AuthController extends Controller
             'phone' => 'required|numeric|min:11|unique:users',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|min:6',
-        ], $msgs);
+        ]);
 
 
         if($validator->fails()){
@@ -53,10 +53,10 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+            'first_name' => ucfirst(strtolower($request->first_name)),
+            'last_name' => ucfirst(strtolower($request->last_name)),
             'phone' => $request->phone,
-            'email' => $request->email,
+            'email' => strtolower($request->email),
             'password' => bcrypt($request->password)
         ]);
  
