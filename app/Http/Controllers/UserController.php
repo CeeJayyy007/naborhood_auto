@@ -97,12 +97,12 @@ class UserController extends Controller
     /**
      * edit patient profile
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request $request $user_id
      * @return \App\Models\User
      */
-    public function editProfile(Request $request)
+    public function editProfile(Request $request, $user_id)
     {
-        $user = $this->getUserById($request->user_id);
+        $user = $this->getUserById($user_id);
         
         $request->first_name? $user->first_name = $request->first_name: null;
         $request->last_name? $user->last_name = $request->last_name: null;
@@ -129,6 +129,19 @@ class UserController extends Controller
 
         // // update user id on audit table
         // $this->auditRepository->updateUserId($request, $user);
+        
+        return $user;
+    }
+
+    /**
+     * edit patient profile
+     *
+     * @param  string  $user_id
+     * @return \App\Models\User
+     */
+    public function getProfile($user_id)
+    {
+        $user = $this->getUserById($user_id);
         
         return $user;
     }

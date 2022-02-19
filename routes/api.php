@@ -30,7 +30,8 @@ Route::group([
       'middleware' => 'auth:api'
     ], function() {
         Route::get('logout', 'Auth\AuthController@logout');
-        Route::post('edit-profile', 'UserController@editProfile');
+        Route::post('edit-profile/{user_id}', 'UserController@editProfile');
+        Route::get('get-profile/{user_id}', 'UserController@getProfile');
     });
     Route::get('/home', 'HomeController@index')->name('home');
 });
