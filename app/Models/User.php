@@ -43,6 +43,15 @@ class User extends Authenticatable
      */
     protected $appends = ['full_name'];
 
+    /**
+     * Get the vehicles owned by a user.
+     */
+    public function vehicle()
+    {
+        return $this->belongsTo('App\Models\Vehicle');
+    }
+
+
 
     /**
      * The attributes that should be cast.

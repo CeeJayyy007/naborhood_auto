@@ -95,7 +95,7 @@ class UserController extends Controller
     }
 
     /**
-     * edit patient profile
+     * edit user profile
      *
      * @param  \Illuminate\Http\Request $request $user_id
      * @return \App\Models\User
@@ -134,7 +134,7 @@ class UserController extends Controller
     }
 
     /**
-     * edit patient profile
+     * get user profile
      *
      * @param  string  $user_id
      * @return \App\Models\User
@@ -144,5 +144,28 @@ class UserController extends Controller
         $user = $this->getUserById($user_id);
         
         return $user;
+    }
+
+     /**
+     * get all user details
+     *
+     * @param  string  $user_id
+     * @return \App\Models\User
+     */
+    public function getAllUserDetail()
+    {
+        $users = User::all();
+
+        foreach($users as $user){
+            $user_detail['id'] = $user->id; 
+            $user_detail['full_name'] = $user->full_name; 
+            $user_detail['phone'] = $user->phone;
+            $user_detail['email'] = $user->email;
+            $user_detail['role'] = $user->role;
+
+            $users_details[]=$user_detail;
+        }
+        
+        return $users_details;
     }
 }
