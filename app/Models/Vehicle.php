@@ -28,6 +28,23 @@ class Vehicle extends Authenticatable
         'mileage',
     ];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['vehicle_name'];
+
+     /**
+     * Get the vehicle's name.
+     *
+     * @return string
+     */
+    public function getVehicleNameAttribute()
+    {
+        return "{$this->brand} {$this->model}";
+    }
+
      /**
      * Get the user a vehicle belongs to
      */

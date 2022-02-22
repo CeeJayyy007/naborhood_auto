@@ -3,14 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 use App\Models\User;
+use App\Models\Vehicle;
 use Carbon\Carbon;
-
 
 
 class UserController extends Controller
 {
     
+    /**
+    * telling the class to inherit ApiResponse trait
+    */
+    use ApiResponse;    
+
     /**
      * Get User using ID
      *
@@ -163,9 +169,18 @@ class UserController extends Controller
             $user_detail['email'] = $user->email;
             $user_detail['role'] = $user->role;
 
-            $users_details[]=$user_detail;
+            $vehicle = Vehicle::where('user_id', $user->id)
+                                ->get();
+
+            $user_detail['vehicle'] = $vehicle;
+            
+            $users_details[] = $user_detail;
         }
         
+        // $message = "User details created successfully!";
+
+        // return $this->successResponse(['users_details' => $users_details], $message);
+
         return $users_details;
     }
 }
