@@ -3,15 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-    
-class Vehicle extends Authenticatable
+class ServiceGroup extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -19,13 +16,9 @@ class Vehicle extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'brand',
-        'model',
-        'year',
-        'number',
-        'colour',
-        'mileage',
+        'staff_id',
+        'service_group_avatar',
+        'service_group_name',
     ];
 
     /**
@@ -33,17 +26,7 @@ class Vehicle extends Authenticatable
      *
      * @var array
      */
-    protected $appends = ['vehicle_name'];
-
-     /**
-     * Get the vehicle's name.
-     *
-     * @return string
-     */
-    public function getVehicleNameAttribute()
-    {
-        return "{$this->brand} {$this->model}";
-    }
+    // protected $appends = ['vehicle_name'];
 
     /**
     * Get the user a vehicle belongs to

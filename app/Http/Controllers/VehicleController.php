@@ -89,13 +89,13 @@ class VehicleController extends Controller
             'year' => $request->year,
             'number' => strtoupper($request->number),
             'colour' => ucfirst(strtolower($request->colour)),
-            'mileage' => $request->mileage
+            'mileage' => $request->mileage,
+            'full_name' => ucfirst(strtolower("$request->brand $request->model"))
         ]);
  
         $message = "Vehicle Registration Successful!";
 
         return $this->successResponse(['vehicle' => $vehicle], $message);
-
     }
 
 
@@ -110,12 +110,13 @@ class VehicleController extends Controller
     {
         $vehicle = $this->getVehicleByUserId($user_id);
         
-        $request->brand? $vehicle->brand = $request->brand: null;
-        $request->model? $vehicle->model = $request->model: null;
+        $request->brand? $vehicle->brand = ucfirst(strtolower($request->brand)): null;
+        $request->model? $vehicle->model = ucfirst(strtolower($request->model)): null;
         $request->year? $vehicle->year = $request->year: null;
         $request->number? $vehicle->number = $request->number: null;
         $request->colour? $vehicle->colour = $request->colour: null;
         $request->mileage? $vehicle->mileage = $request->mileage: null;
+        $request->brand? $vehicle->vehicle_name = "$request->brand $request->model": null;
         $vehicle->save();
 
         // // update user id on audit table

@@ -110,13 +110,14 @@ class UserController extends Controller
     {
         $user = $this->getUserById($user_id);
         
-        $request->first_name? $user->first_name = $request->first_name: null;
-        $request->last_name? $user->last_name = $request->last_name: null;
+        $request->first_name? $user->first_name = ucfirst(strtolower($request->first_name)): null;
+        $request->last_name? $user->last_name = ucfirst(strtolower($request->last_name)): null;
         $request->dob? $user->dob = $request->dob: null;
         $request->dob? $user->age = Carbon::parse($request->dob)->age: null;
         $request->gender? $user->gender = $request->gender: null;
         $request->phone? $user->phone = $request->phone: null;
         $request->email? $user->email = $request->email: null;
+        $request->first_name? $user->full_name = "$request->first_name $request->last_name": null;
         $user->save();
 
         // add roles
@@ -161,6 +162,8 @@ class UserController extends Controller
     public function getAllUserDetail()
     {
         $users = User::all();
+
+        $users_details = [];
 
         foreach($users as $user){
             $user_detail['id'] = $user->id; 

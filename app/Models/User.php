@@ -52,6 +52,22 @@ class User extends Authenticatable
     }
 
 
+    /**
+     * Get the service groups owned by a user.
+     */
+    public function ServiceGroup()
+    {
+        return $this->belongsTo('App\Models\ServiceGroup');
+    }
+
+    /**
+     * Get the service owned by a user.
+     */
+    public function Service()
+    {
+        return $this->belongsTo('App\Models\Service');
+    }
+
 
     /**
      * The attributes that should be cast.

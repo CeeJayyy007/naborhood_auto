@@ -48,6 +48,28 @@ Route::group([
 
         // edit vehicle profile
         Route::post('edit-vehicle-profile/{user_id}', 'VehicleController@editVehicleProfile');
+
+        // create service group
+        Route::post('new-service-group', 'ServiceGroupController@newServiceGroup');
+
+        // edit service group
+        Route::post('edit-service-group/{service_group_id}', 'ServiceGroupController@editServiceGroup');
+
+        // get all service groups
+        Route::get('get-service-group', 'ServiceGroupController@getServiceGroup');
+
+        // create service
+        Route::post('new-service', 'ServiceController@newService');
+
+        // edit service
+        Route::post('edit-service/{service_id}', 'ServiceController@editService');
+
+        // get all service
+        Route::get('get-service', 'ServiceController@getService');
+
+        // get service
+        Route::get('get-service/{service_group_id}', 'ServiceController@getService');
+        
     });
     Route::get('/home', 'HomeController@index')->name('home');
 });
