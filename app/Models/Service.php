@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 
 class Service extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -35,5 +36,13 @@ class Service extends Model
     public function user()
     {
         return $this->belongsToMany('App\Models\User');
+    }
+
+     /**
+    * Get the services that belong to a service group
+    */
+    public function serviceGroup()
+    {
+        return $this->belongsToMany('App\Models\ServiceGroup');
     }
 }

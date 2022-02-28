@@ -25,7 +25,7 @@ class UserController extends Controller
      */
     public function getUserById($user_id)
     {
-        return User::findOrFail($user_id);
+        return User::find($user_id);
         // return User::withTrashed()->findOrFail($user_id);
     }
     
@@ -161,10 +161,13 @@ class UserController extends Controller
      */
     public function getAllUserDetail()
     {
+        // get all users 
         $users = User::all();
 
+        // initialize users_details array
         $users_details = [];
 
+        // populate user_detail array
         foreach($users as $user){
             $user_detail['id'] = $user->id; 
             $user_detail['full_name'] = $user->full_name; 
@@ -172,6 +175,7 @@ class UserController extends Controller
             $user_detail['email'] = $user->email;
             $user_detail['role'] = $user->role;
 
+            // get vehicle details for selected user
             $vehicle = Vehicle::where('user_id', $user->id)
                                 ->get();
 
@@ -186,4 +190,40 @@ class UserController extends Controller
 
         return $users_details;
     }
+
+     /**
+     * delete user
+     *
+     * @param  string  $user_id
+     * @return \App\Models\User
+     */
+    public function deleteUser($user_id)
+    {
+        // get user details
+        $user = $this->getUserById($user_id);
+
+        // check if user details exist
+        if($user){
+            // get vehicles belonging to selected user
+            $vehicles = Vehicle::where('user_id', $user->id)->get();
+
+            // loop through vehicle data incase user has multiple vehicles
+            foreach($vehicles as $vehicle){
+                $vehicle->delete();                
+            } 
+            // delete selected user
+            $user->delete();
+            $message = "User and related vehicles deleted successfully!";
+        
+        }else{
+            // if user does not exist, display message
+            $message = "User does not exist or has been deleted!";
+        }
+
+        return ['message' => $message];
+    }
+
+
+
+
 }

@@ -43,11 +43,17 @@ Route::group([
         // get all user detail
         Route::get('get-all-detail', 'UserController@getAllUserDetail');
         
+        // delete user
+        Route::get('delete-user/{user_id}', 'UserController@deleteUser');
+
         // register new vehicle
         Route::post('new-vehicle', 'VehicleController@registerVehicle');
 
         // edit vehicle profile
         Route::post('edit-vehicle-profile/{user_id}', 'VehicleController@editVehicleProfile');
+
+        // delete vehicle
+        Route::get('delete-vehicle/{vehicle_id}', 'VehicleController@deleteVehicle');
 
         // create service group
         Route::post('new-service-group', 'ServiceGroupController@newServiceGroup');
@@ -57,6 +63,9 @@ Route::group([
 
         // get all service groups
         Route::get('get-service-group', 'ServiceGroupController@getServiceGroup');
+
+        // delete service group
+        Route::get('delete-service-group/{service_group_id}', 'ServiceGroupController@deleteServiceGroup');
 
         // create service
         Route::post('new-service', 'ServiceController@newService');
@@ -69,7 +78,10 @@ Route::group([
 
         // get service
         Route::get('get-service/{service_group_id}', 'ServiceController@getService');
-        
+     
+        // delete service
+        Route::get('delete-service/{service_id}', 'ServiceController@deleteService');
+
     });
     Route::get('/home', 'HomeController@index')->name('home');
 });

@@ -23,9 +23,9 @@ class VehicleController extends Controller
      * @param  int $user_id
      * @return array
      */
-    public function getVehicleByUserId($user_id)
+    public function getVehicleByVehicleId($vehicle_id)
     {
-        return Vehicle::findOrFail($user_id);
+        return Vehicle::find($vehicle_id);
         // return User::withTrashed()->findOrFail($user_id);
     }
     
@@ -39,23 +39,6 @@ class VehicleController extends Controller
     public function getVehiclesbyUsersIds($user_ids)
     {
         return Vehicle::findMany($user_ids);
-    }
-
-    /**
-     * pluck users ids from request then get model instances from db
-     *
-     * @param  Request $request
-     * @return array
-     */
-    public function extractIdsAndFetchVehicles($request)
-    {
-    	$vehicle_ids = [];
-
-    	foreach ($request->vehicles as $vehicle) {
-    		array_push($vehicle_ids, $vehicle['vehicle_id']);
-    	}
-
-        return $this->getVehiclesByUserIds($user_ids);
     }
 
         /**
@@ -160,4 +143,30 @@ class VehicleController extends Controller
         
         return $users_details;
     }
+
+     /**
+     * delete vehicle
+     *
+     * @param  string  $vehicle_id
+     * @return \App\Models\Vehicle
+     */
+    public function deleteVehicle($vehicle_id)
+    {
+        // get vehicle details
+        $vehicle = $this->getVehicleByVehicleId($vehicle_id);
+
+        // check if vehicle details exist
+        if($vehicle){
+            // delete selected vehicle
+            $vehicle->delete();
+            $message = "Vehicle deleted successfully!";
+        
+        }else{
+            // if vehicle does not exist, display message
+            $message = "Vehicle does not exist or has been deleted!";
+        }
+
+        return ['message' => $message];
+    }
+
 }

@@ -27,7 +27,7 @@ class ServiceController extends Controller
      */
     public function getServiceById($service_id)
     {
-        return Service::findOrFail($service_id);
+        return Service::find($service_id);
         // return User::withTrashed()->findOrFail($user_id);
     }
     
@@ -136,7 +136,7 @@ class ServiceController extends Controller
         $services = Service::where('service_group_id', $service_group_id)->get();
         
         $service_detail = [];
-        
+
         foreach($services as $service){
 
             $service['service_group_id'] = $service->service_group_id; 
@@ -154,5 +154,30 @@ class ServiceController extends Controller
         }
         
         return $service_detail;
+    }
+
+     /**
+     * delete service
+     *
+     * @param  string  $service_id
+     * @return \App\Models\Service
+     */
+    public function deleteService($service_id)
+    {
+        // get service details
+        $service = $this->getServiceById($service_id);
+
+        // check if service details exist
+        if($service){
+            // delete selected service
+            $service->delete();
+            $message = "Service deleted successfully!";
+        
+        }else{
+            // if service does not exist, display message
+            $message = "Service does not exist or has been deleted!";
+        }
+
+        return ['message' => $message];
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use App\Models\ServiceGroup;
+use App\Models\Service;
 use App\Models\User;
 use Carbon\Carbon;
 use Validator;
@@ -26,7 +27,7 @@ class ServiceGroupController extends Controller
      */
     public function getServiceGroupById($service_group_id)
     {
-        return ServiceGroup::findOrFail($service_group_id);
+        return ServiceGroup::find($service_group_id);
         // return User::withTrashed()->findOrFail($user_id);
     }
     
@@ -116,5 +117,38 @@ class ServiceGroupController extends Controller
         }
         
         return $service_group_detail;
+    }
+
+
+      /**
+     * delete service group
+     *
+     * @param  string  $service_group_id
+     * @return \App\Models\ServiceGroup
+     */
+    public function deleteServiceGroup($service_group_id)
+    {
+        // get service group details
+        $serviceGroup = $this->getServiceGroupById($service_group_id);
+
+        // check if service group details exist
+        if($serviceGroup){
+            // get services belonging to selected user
+            $services = Service::where('service_group_id', $serviceGroup->id)->get();
+            
+            // loop through service group data incase user has multiple services
+            foreach($services as $service){
+                $service->delete();                
+            } 
+            // delete selected service group
+            $serviceGroup->delete();
+            $message = "Service group and related services deleted successfully!";
+        
+        }else{
+            // if user does not exist, display message
+            $message = "Service group does not exist or has been deleted!";
+        }
+
+        return ['message' => $message];
     }
 }
