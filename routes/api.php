@@ -37,12 +37,18 @@ Route::group([
         // edituser profile
         Route::post('edit-profile/{user_id}', 'UserController@editProfile');
        
+        // upload avatar
+        Route::post('upload-avatar', 'UserController@uploadAvatar');
+
         // get user profile
         Route::get('get-profile/{user_id}', 'UserController@getProfile');
        
         // get all user detail
         Route::get('get-all-detail', 'UserController@getAllUserDetail');
-        
+       
+        // delete user avatar
+        Route::get('delete-user-avatar/{user_id}', 'UserController@deleteUserAvatar');
+
         // delete user
         Route::get('delete-user/{user_id}', 'UserController@deleteUser');
 

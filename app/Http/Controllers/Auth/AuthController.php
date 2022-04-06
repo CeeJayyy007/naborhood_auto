@@ -57,7 +57,7 @@ class AuthController extends Controller
             'last_name' => ucfirst(strtolower($request->last_name)),
             'phone' => $request->phone,
             'email' => strtolower($request->email),
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
         ]);
  
         $token = $user->createToken('naborhood Token')->accessToken;

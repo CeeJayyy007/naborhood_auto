@@ -27,6 +27,7 @@ class Vehicle extends Authenticatable
         'number',
         'colour',
         'mileage',
+        'vehicle_avatar'
     ];
 
     /**

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
+use File;
 
 
 class UserController extends Controller
@@ -16,6 +18,11 @@ class UserController extends Controller
     * telling the class to inherit ApiResponse trait
     */
     use ApiResponse;    
+
+     /**
+    * telling the class to inherit FileUpload trait
+    */
+    use FileUpload;    
 
     /**
      * Get User using ID
@@ -191,6 +198,67 @@ class UserController extends Controller
         return $users_details;
     }
 
+
+     /**
+     * upload user avatar
+     *
+     * @param  \Illuminate\Http\Request $request $user_id
+     * @return \App\Models\User
+     */
+    public function uploadAvatar(Request $request){
+        
+        // get user id of selected user
+        $user_id = $request->user_id;
+
+        // check if file to be uploaded exists
+        if ($request->file()) {
+            
+            // call image upload trait
+            $newImageName = $this->newImageUpload($request);
+
+            // get user records of selected user from users table
+            $user = $this->getUserById($user_id);
+
+            // save new image as user avatar
+            $user['user_avatar'] = $newImageName;
+
+            $user->save();
+
+            $message = "User avatar uploaded successfully!";
+
+        }else{
+            $message = "Please select your avatar image";
+        }
+        
+        return $this->successResponse(["Image" => $newImageName ], $message);
+    }
+
+    /**
+     * delete user avatar
+     *
+     * @param  string  $user_id
+     * @return \App\Models\User
+     */
+    public function deleteUserAvatar($user_id)
+    {
+        // get user details
+        $user = $this->getUserById($user_id);
+        
+        // check if user details exist
+        if($user && $user->user_avatar != null){   
+            // delete uploaded image
+            $message = $this->deleteUploadedImage($user);
+            
+        }else{
+            // if user does not exist, display message
+            $message = "User or user avatar does not exist or has been deleted!";
+        }
+
+        return $this->successResponse([], $message);
+    }
+
+
+    
      /**
      * delete user
      *
@@ -220,10 +288,8 @@ class UserController extends Controller
             $message = "User does not exist or has been deleted!";
         }
 
-        return ['message' => $message];
+        return $this->successResponse([], $message);
     }
-
-
 
 
 }

@@ -15,9 +15,9 @@ class CreateServiceGroupsTable extends Migration
     {
         Schema::create('service_groups', function (Blueprint $table) {
             $table->id();
-            $table->integer('staff_id')->nullable();
-            $table->string('service_group_avatar')->default('service.png')->nullable();
-            $table->string('service_group_name')->nullable();
+            $table->integer('staff_id');
+            $table->string('service_group_avatar')->default('service_group.png')->nullable();
+            $table->string('service_group_name');
             $table->timestamps();
         });
     }
