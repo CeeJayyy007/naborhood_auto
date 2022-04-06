@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use Validator;
 
 use Carbon\Carbon;
@@ -12,10 +13,16 @@ use Carbon\Carbon;
 
 class VehicleController extends Controller
 {
-     /**
+    /**
      * telling the class to inherit ApiResponse trait
      */
-    use ApiResponse;    
+    use ApiResponse;  
+
+    /**
+     * telling the class to inherit FileUpload trait
+     */
+    use FileUpload;  
+      
 
     /**
      * Get vehicle by using ID
@@ -143,6 +150,79 @@ class VehicleController extends Controller
         
         return $users_details;
     }
+
+    /**
+     * upload vehicle avatar
+     *
+     * @param  \Illuminate\Http\Request $request $user_id
+     * @return \App\Models\Vehicle
+     */
+    public function uploadAvatar(Request $request){
+        
+        // get user id and vehicle id of selected vehicle
+        $user_id = $request->user_id;
+        $vehicle_id = $request->vehicle_id;
+
+        $validator = Validator::make($request->all(),[
+                "image" => "required|file|mimes:jpeg,png,jpg,gif,svg|max:5048",
+                "vehicle_id" => "required|integer"
+            ]);
+
+        if($validator->fails()){
+        return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
+        }
+
+        // check if file to be uploaded exists
+        if ($request->file()) {
+            
+            // get user records of selected user from users table
+            $vehicle = $this->getVehicleByVehicleId($vehicle_id);
+            
+            // call image upload trait
+            $newImageName = $this->newImageUpload($request, $vehicle);
+
+            // save new image as user avatar
+            $vehicle['avatar'] = $newImageName;
+
+            $vehicle->save();
+
+            $message = "Vehicle avatar uploaded successfully!";
+
+        }else{
+            $message = "Please select your avatar image";
+        }
+        
+        return $this->successResponse(["Image" => $newImageName ], $message);
+    }
+    
+
+    /**
+     * delete vehicle avatar
+     *
+     * @param  string  $vehicle_id
+     * @return \App\Models\User
+     */
+    public function deleteVehicleAvatar($vehicle_id)
+    {
+        // get vehicle details
+        $vehicle = $this->getVehicleByVehicleId($vehicle_id);
+        
+        // check if vehicle details exist
+        if($vehicle && $vehicle->avatar != 'vehicle.png'){   
+            // delete uploaded image
+            $message = $this->deleteUploadedImage($vehicle);
+            $vehicle['avatar'] = 'vehicle.png';
+            $vehicle->save();
+            $message = "Avatar removed successfully!";   
+        }else{
+            // if user does not exist, display message
+            $message = "Vehicle or vehicle avatar does not exist or has been deleted!";
+        }
+
+        return $this->successResponse([], $message);
+    }
+
+
 
      /**
      * delete vehicle

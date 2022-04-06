@@ -20,24 +20,26 @@ trait FileUpload
      * @param  \Illuminate\Http\Request  $request
      * @return App\Trait
      */
-    public function newImageUpload(Request $request)
-    {
- 
-            $validator = Validator::make($request->all(),[
-               "image" => "required|file|mimes:jpeg,png,jpg,gif,svg|max:5048",
-               "user_id" => "required|integer"
-            ]);
+    public function newImageUpload(Request $request, $user)
+    {           
+        // get filename of file to be uploaded
+        $file_name_with_extension = $user->avatar;
+        
+        // // get file path in public folder
+        $file_path = public_path('images/'.$file_name_with_extension);
 
-            if($validator->fails()){
-            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
-            }
-            
+        // check if file exists in public folder and delete
+        if(File::exists($file_path)){
+            File::delete($file_path);
+            // create new uploaded image name and save image into public_path
             $newImageName = time().'_'.$request->image->getClientOriginalName();
-            $test = $request->image->move(public_path('images'), $newImageName);
-            
-            // dd($test);
-
-            return $newImageName;
+            $request->image->move(public_path('images'), $newImageName);
+        }else{
+            // create new uploaded image name and save image into public_path
+            $newImageName = time().'_'.$request->image->getClientOriginalName();
+            $request->image->move(public_path('images'), $newImageName);            
+        }
+        return $newImageName;
     }
 
     
@@ -47,24 +49,23 @@ trait FileUpload
      */
     public function deleteUploadedImage($user)
     {
-
         // get filename of file to be deleted
-            $file_name_with_extension = $user->user_avatar;
-            
-            // // get file path in public folder
-            $file_path = public_path('images/'.$file_name_with_extension);
+        $file_name_with_extension = $user->avatar;
+        
+        // // get file path in public folder
+        $file_path = public_path('images/'.$file_name_with_extension);
 
-            // delete locally
-            // check if file exists in public folder, then delete
-            if(File::exists($file_path)){
-                File::delete($file_path);
-                $user['user_avatar'] = null;
-                $user->save();
-                $message = "User avatar removed successfully!";
-            }else{
-                // if file does not exist, display message
-                $message = "Image does not exist or has been deleted!";
-            }
+        // delete locally
+        // check if file exists in public folder, then delete
+        if(File::exists($file_path)){
+            File::delete($file_path);
+            $user['avatar'] = null;
+            $user->save();
+            $message = "Avatar removed successfully!";
+        }else{
+            // if file does not exist, display message
+            $message = "Image does not exist or has been deleted!";
+        }
         return $message;
     }
 }

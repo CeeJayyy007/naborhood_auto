@@ -17,7 +17,7 @@ class CreateServicesTable extends Migration
             $table->id();
             $table->integer('staff_id');
             $table->integer('service_group_id');
-            $table->string('service_avatar')->default('service.png')->nullable();
+            $table->string('avatar')->default('service.png')->nullable();
             $table->string('service_name');
             $table->integer('service_price');
             $table->timestamps();

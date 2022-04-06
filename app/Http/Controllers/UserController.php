@@ -8,8 +8,7 @@ use App\Traits\FileUpload;
 use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
-use File;
-
+use Validator;
 
 class UserController extends Controller
 {
@@ -206,21 +205,32 @@ class UserController extends Controller
      * @return \App\Models\User
      */
     public function uploadAvatar(Request $request){
-        
+
         // get user id of selected user
         $user_id = $request->user_id;
-
+        
+        // validate inputs
+        $validator = Validator::make($request->all(),[
+            "image" => "required|file|mimes:jpeg,png,jpg,gif,svg|max:5048",
+            "user_id" => "required|integer"
+        ]);
+        
+        // check validator
+        if($validator->fails()){
+            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
+        }
+        
         // check if file to be uploaded exists
         if ($request->file()) {
             
-            // call image upload trait
-            $newImageName = $this->newImageUpload($request);
-
             // get user records of selected user from users table
             $user = $this->getUserById($user_id);
+            
+            // call image upload trait
+            $newImageName = $this->newImageUpload($request, $user);
 
             // save new image as user avatar
-            $user['user_avatar'] = $newImageName;
+            $user['avatar'] = $newImageName;
 
             $user->save();
 
@@ -232,6 +242,7 @@ class UserController extends Controller
         
         return $this->successResponse(["Image" => $newImageName ], $message);
     }
+    
 
     /**
      * delete user avatar
@@ -245,7 +256,7 @@ class UserController extends Controller
         $user = $this->getUserById($user_id);
         
         // check if user details exist
-        if($user && $user->user_avatar != null){   
+        if($user && $user->avatar != null){   
             // delete uploaded image
             $message = $this->deleteUploadedImage($user);
             

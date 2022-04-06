@@ -15,7 +15,7 @@ class AddVehicleAvatarAndVehicleNameToVehiclesTable extends Migration
     {
         Schema::table('vehicles', function (Blueprint $table) {
             $table->string('vehicle_name')->nullable();
-            $table->string('vehicle_avatar')->default('vehicle.png')->nullable();
+            $table->string('avatar')->default('vehicle.png')->nullable();
         });
     }
 

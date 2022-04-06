@@ -37,14 +37,14 @@ Route::group([
         // edituser profile
         Route::post('edit-profile/{user_id}', 'UserController@editProfile');
        
-        // upload avatar
-        Route::post('upload-avatar', 'UserController@uploadAvatar');
-
         // get user profile
         Route::get('get-profile/{user_id}', 'UserController@getProfile');
-       
+        
         // get all user detail
         Route::get('get-all-detail', 'UserController@getAllUserDetail');
+        
+        // upload user avatar
+        Route::post('upload-avatar', 'UserController@uploadAvatar');
        
         // delete user avatar
         Route::get('delete-user-avatar/{user_id}', 'UserController@deleteUserAvatar');
@@ -60,6 +60,12 @@ Route::group([
 
         // delete vehicle
         Route::get('delete-vehicle/{vehicle_id}', 'VehicleController@deleteVehicle');
+
+        // upload vehicle avatar
+        Route::post('upload-vehicle-avatar', 'VehicleController@uploadAvatar');
+       
+        // delete vehicle avatar
+        Route::get('delete-vehicle-avatar/{user_id}', 'VehicleController@deleteVehicleAvatar');
 
         // create service group
         Route::post('new-service-group', 'ServiceGroupController@newServiceGroup');
