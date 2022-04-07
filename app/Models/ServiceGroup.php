@@ -20,6 +20,7 @@ class ServiceGroup extends Model
         'staff_id',
         'service_group_avatar',
         'service_group_name',
+        'avatar'
     ];
 
     /**

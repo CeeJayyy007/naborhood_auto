@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use App\Models\ServiceGroup;
 use App\Models\Service;
 use App\Models\User;
@@ -18,6 +19,11 @@ class ServiceGroupController extends Controller
      * telling the class to inherit ApiResponse trait
      */
     use ApiResponse;    
+    
+    /**
+     * telling the class to inherit FileUpload trait
+     */
+    use FileUpload;  
 
     /**
      * Get service group by using ID
@@ -42,24 +48,32 @@ class ServiceGroupController extends Controller
     public function newServiceGroup(Request $request)
     {   
         $validator = Validator::make($request->all(),[
-            'service_group_avatar' => 'required|string|max:255',
-            'service_group_name' => 'required|string|max:255',
+            'service_group_name' => 'required|string|unique:service_groups,service_group_name,deleted_at|max:255',
+            'image' => "file|mimes:jpeg,png,jpg,gif,svg|max:5048",
         ]);
-
 
         if($validator->fails()){
             return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
         }
-
+        
+        // check if file to be uploaded exists
+        if ($request->file()) {    
+            // call image upload trait
+            $newImageName = $this->newCreatedImageUpload($request);
+        }else{
+            $newImageName = 'service_group.png';
+        }
+        
+        // get id of staff creating new service group
         $user = Auth::user();
 
         $serviceGroup = ServiceGroup::create([
             'staff_id' => $user->id,
-            'service_group_avatar' => $request->service_group_avatar,
             'service_group_name' => ucfirst(strtolower($request->service_group_name)),
+            'avatar' => $newImageName,
         ]);
  
-        $message = "Service Group Created Successful!";
+        $message = "Service Group Created Successfully!";
 
         return $this->successResponse(['serviceGroup' => $serviceGroup], $message);
     }
@@ -74,19 +88,35 @@ class ServiceGroupController extends Controller
      */
     public function editServiceGroup(Request $request, $service_group_id)
     {
-        $serviceGroup = $this->getServiceGroupById($service_group_id);
+        $validator = Validator::make($request->all(),[
+                "image" => "file|mimes:jpeg,png,jpg,gif,svg|max:5048",
+            ]);
+
+        $service_group = $this->getServiceGroupById($service_group_id);
         
+        if($validator->fails()){
+        return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
+        }
+
+        // check if file to be uploaded exists
+        if ($request->file()) {    
+            // call image upload trait
+            $newImageName = $this->newImageUpload($request, $service_group);
+            // save new image as user avatar
+            $service_group['avatar'] = $newImageName;
+            $service_group->save();    
+        }
+
         $user = Auth::user();
 
-        $request->service_group_name? $serviceGroup->staff_id = $user->id: null;
-        $request->service_group_name? $serviceGroup->service_group_name = ucfirst(strtolower($request->service_group_name)): null;
-        $request->service_group_name? $serviceGroup->service_group_avatar = $request->service_group_avatar: null;
-        $serviceGroup->save();
+        $request->service_group_name? $service_group->staff_id = $user->id: null;
+        $request->service_group_name? $service_group->service_group_name = ucfirst(strtolower($request->service_group_name)): null;
+        $service_group->save();
 
         // // update user id on audit table
         // $this->auditRepository->updateUserId($request, $user);
         
-        return $serviceGroup;
+        return $service_group;
     }
 
     
@@ -103,14 +133,14 @@ class ServiceGroupController extends Controller
 
         foreach($serviceGroups as $serviceGroup){
             $service_group['id'] = $serviceGroup->id; 
-            $service_group['service_group_avatar'] = $serviceGroup->service_group_avatar; 
+            $service_group['avatar'] = $serviceGroup->avatar; 
             $service_group['service_group_name'] = $serviceGroup->service_group_name;
 
             // get user details from users table
             $user = User::findOrFail($serviceGroup->staff_id);
 
             $service_group['staff_name'] = $user->full_name;
-            $service_group['staff_avatar'] = $user->user_avatar;
+            $service_group['staff_avatar'] = $user->avatar;
             $service_group['updated_at'] = $serviceGroup->updated_at->format('d M Y');
 
             $service_group_detail[]=$service_group;
@@ -119,8 +149,7 @@ class ServiceGroupController extends Controller
         return $service_group_detail;
     }
 
-
-      /**
+    /**
      * delete service group
      *
      * @param  string  $service_group_id
@@ -141,6 +170,7 @@ class ServiceGroupController extends Controller
                 $service->delete();                
             } 
             // delete selected service group
+            $this->deleteUploadedImage($serviceGroup); 
             $serviceGroup->delete();
             $message = "Service group and related services deleted successfully!";
         
@@ -149,6 +179,6 @@ class ServiceGroupController extends Controller
             $message = "Service group does not exist or has been deleted!";
         }
 
-        return ['message' => $message];
+        return $this->successResponse([], $message);
     }
 }

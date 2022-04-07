@@ -62,7 +62,7 @@ class VehicleController extends Controller
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'year' => 'numeric',
-            'number' => 'required|string',
+            'number' => 'required|string',-
             'colour' => 'required|string',
             'mileage' => 'numeric',
         ]);
@@ -221,7 +221,6 @@ class VehicleController extends Controller
 
         return $this->successResponse([], $message);
     }
-
 
 
      /**

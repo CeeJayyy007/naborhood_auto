@@ -19,8 +19,8 @@ class Service extends Model
         'staff_id',
         'service_group_id',
         'service_name',
-        'service_avatar',
         'service_price',
+        'avatar',
     ];
 
     /**

@@ -16,6 +16,21 @@ trait FileUpload
     use ApiResponse;    
 
     /**
+     * upload new file while creating new entry
+     * @param  \Illuminate\Http\Request  $request
+     * @return App\Trait
+     */
+    public function newCreatedImageUpload(Request $request)
+    {           
+        // create new uploaded image name and save image into public_path
+        $newImageName = time().'_'.$request->image->getClientOriginalName();
+        $request->image->move(public_path('images'), $newImageName);            
+        
+        return $newImageName;
+    }
+
+
+    /**
      * upload new file
      * @param  \Illuminate\Http\Request  $request
      * @return App\Trait

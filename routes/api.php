@@ -79,6 +79,12 @@ Route::group([
         // delete service group
         Route::get('delete-service-group/{service_group_id}', 'ServiceGroupController@deleteServiceGroup');
 
+        // upload service group avatar
+        Route::post('upload-group-avatar', 'ServiceGroupController@uploadAvatar');
+       
+        // delete service group avatar
+        Route::get('delete-group-avatar/{user_id}', 'ServiceGroupController@deleteGroupAvatar');
+
         // create service
         Route::post('new-service', 'ServiceController@newService');
 
