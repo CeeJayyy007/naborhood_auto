@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use App\Models\ServiceGroup;
 use App\Models\Service;
 use App\Models\User;
@@ -17,7 +18,12 @@ class ServiceController extends Controller
      /**
      * telling the class to inherit ApiResponse trait
      */
-    use ApiResponse;    
+    use ApiResponse;   
+    
+    /**
+     * telling the class to inherit FileUpload trait
+     */
+    use FileUpload;  
 
     /**
      * Get service by using ID
@@ -43,29 +49,47 @@ class ServiceController extends Controller
     {   
         $validator = Validator::make($request->all(),[
             'service_group_id' => 'required|numeric',
-            'service_name' => 'required|string|max:255',
-            'service_avatar' => 'required|string|max:255',
+            'service_name' => 'required|string|unique:services,service_name,deleted_at|max:255',
             'service_price' => 'required|numeric',
+            'image' => "file|mimes:jpeg,png,jpg,gif,svg|max:5048",
         ]);
-
 
         if($validator->fails()){
             return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
         }
 
-        $user = Auth::user();
+        $checker = ServiceGroup::select('id')->where('id',$request->service_group_id)->exists();
 
-        $service = Service::create([
-            'staff_id' => $user->id,
-            'service_group_id' => $request->service_group_id,
-            'service_name' => ucfirst(strtolower($request->service_name)),
-            'service_avatar' => $request->service_avatar,
-            'service_price' => $request->service_price,
-        ]);
- 
-        $message = "Service Created Successful!";
+        // check if selected service group exists
+        if($checker){
+            // check if file to be uploaded exists
+            if ($request->file()) {    
+                // call image upload trait
+                $newImageName = $this->newCreatedImageUpload($request);
+            }else{
+                $newImageName = 'service.png';
+            }
 
-        return $this->successResponse(['service' => $service], $message);
+            // get id of staff creating new service group
+            $user = Auth::user();
+
+            // create service records
+            $service = Service::create([
+                'staff_id' => $user->id,
+                'service_group_id' => $request->service_group_id,
+                'service_name' => ucfirst(strtolower($request->service_name)),
+                'avatar' => $newImageName,
+                'service_price' => $request->service_price,
+            ]);
+    
+            $message = "Service Created Successful!";
+            return $this->successResponse(['service' => $service], $message);
+
+        }else{
+            // if selected service group does not exist, display message
+            $message = "Selected service group does not exist or has been deleted!";
+            return $this->successResponse([], $message);
+        }
     }
 
 
@@ -78,14 +102,28 @@ class ServiceController extends Controller
      */
     public function editService(Request $request, $service_id)
     {
+        $validator = Validator::make($request->all(),[
+                "image" => "file|mimes:jpeg,png,jpg,gif,svg|max:5048",
+            ]);
+            
+        if($validator->fails()){
+            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
+        }
+
         $service = $this->getServiceById($service_id);
+        
+        // check if file to be uploaded exists
+        if ($request->file()) {    
+            // call image upload trait
+            $newImageName = $this->newImageUpload($request, $service); 
+        }       
         
         $user = Auth::user();
 
         $request->service_name? $service->staff_id = $user->id: null;
-        $request->service_name? $service->service_group_id = $service->service_group_id: null;
+        $request->service_group_id? $service->service_group_id = $service->service_group_id: null;
         $request->service_name? $service->service_name = ucfirst(strtolower($request->service_name)): null;
-        $request->service_avatar? $service->service_avatar = $request->service_avatar: null;
+        $request->file()? $service->avatar = $newImageName: null;
         $request->service_price? $service->service_price = $request->service_price: null;
         $service->save();
 
@@ -110,7 +148,7 @@ class ServiceController extends Controller
             // $service['id'] = $service->id; 
             $service['service_group_id'] = $service->service_group_id; 
             $service['service_name'] = $service->service_name;
-            $service['service_avatar'] = $service->service_avatar;
+            $service['avatar'] = $service->avatar;
             $service['service_price'] = $service->service_price;
 
             // get user details from users table
@@ -141,7 +179,7 @@ class ServiceController extends Controller
 
             $service['service_group_id'] = $service->service_group_id; 
             $service['service_name'] = $service->service_name;
-            $service['service_avatar'] = $service->service_avatar;
+            $service['avatar'] = $service->avatar;
             $service['service_price'] = $service->service_price;
 
             // get user details from users table
@@ -170,6 +208,7 @@ class ServiceController extends Controller
         // check if service details exist
         if($service){
             // delete selected service
+            $this->deleteUploadedImage($service); 
             $service->delete();
             $message = "Service deleted successfully!";
         
@@ -178,6 +217,6 @@ class ServiceController extends Controller
             $message = "Service does not exist or has been deleted!";
         }
 
-        return ['message' => $message];
+       return $this->successResponse([], $message);
     }
 }

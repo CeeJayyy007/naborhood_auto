@@ -245,7 +245,7 @@ class VehicleController extends Controller
             $message = "Vehicle does not exist or has been deleted!";
         }
 
-        return ['message' => $message];
+        return $this->successResponse([], $message);
     }
 
 }

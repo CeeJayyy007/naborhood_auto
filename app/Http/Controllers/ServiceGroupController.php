@@ -91,28 +91,31 @@ class ServiceGroupController extends Controller
         $validator = Validator::make($request->all(),[
                 "image" => "file|mimes:jpeg,png,jpg,gif,svg|max:5048",
             ]);
+            
+        if($validator->fails()){
+            return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
+        }
 
         $service_group = $this->getServiceGroupById($service_group_id);
         
-        if($validator->fails()){
-        return $this->errorResponseWithDetails('validation failed', $validator->errors(), 200);
-        }
-
         // check if file to be uploaded exists
         if ($request->file()) {    
             // call image upload trait
-            $newImageName = $this->newImageUpload($request, $service_group);
-            // save new image as user avatar
-            $service_group['avatar'] = $newImageName;
-            $service_group->save();    
+            $newImageName = $this->newImageUpload($request, $service_group); 
         }
-
+        
         $user = Auth::user();
 
-        $request->service_group_name? $service_group->staff_id = $user->id: null;
-        $request->service_group_name? $service_group->service_group_name = ucfirst(strtolower($request->service_group_name)): null;
-        $service_group->save();
-
+        if($service_group){           
+            $request->service_group_name? $service_group->staff_id = $user->id: null;
+            $request->service_group_name? $service_group->service_group_name = ucfirst(strtolower($request->service_group_name)): null;
+            $request->file()? $service_group->avatar = $newImageName: null;
+            $service_group->save();
+        }else{
+            $message = "Selected user does not exist or has been deleted!";
+            return $this->successResponse([], $message);
+        }
+            
         // // update user id on audit table
         // $this->auditRepository->updateUserId($request, $user);
         
