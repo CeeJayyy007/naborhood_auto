@@ -111,26 +111,34 @@ class ServiceController extends Controller
         }
 
         $service = $this->getServiceById($service_id);
-        
-        // check if file to be uploaded exists
-        if ($request->file()) {    
-            // call image upload trait
-            $newImageName = $this->newImageUpload($request, $service); 
-        }       
-        
-        $user = Auth::user();
 
-        $request->service_name? $service->staff_id = $user->id: null;
-        $request->service_group_id? $service->service_group_id = $service->service_group_id: null;
-        $request->service_name? $service->service_name = ucfirst(strtolower($request->service_name)): null;
-        $request->file()? $service->avatar = $newImageName: null;
-        $request->service_price? $service->service_price = $request->service_price: null;
-        $service->save();
+        // check if selected service group exists
+        if($service){
+            // check if file to be uploaded exists
+            if ($request->file()) {    
+                // call image upload trait
+                $newImageName = $this->newImageUpload($request, $service); 
+            }       
+            
+            $user = Auth::user();
 
-        // // update user id on audit table
-        // $this->auditRepository->updateUserId($request, $user);
-        
-        return $service;
+            $request->service_name? $service->staff_id = $user->id: null;
+            $request->service_group_id? $service->service_group_id = $service->service_group_id: null;
+            $request->service_name? $service->service_name = ucfirst(strtolower($request->service_name)): null;
+            $request->file()? $service->avatar = $newImageName: null;
+            $request->service_price? $service->service_price = $request->service_price: null;
+            $service->save();
+
+            // // update user id on audit table
+            // $this->auditRepository->updateUserId($request, $user);
+            
+            $message = "Service updated successfully!";
+            return $this->successResponse(['service' => $service], $message);
+        }else{
+           // if selected service group does not exist, display message
+            $message = "Selected service does not exist or has been deleted!";
+            return $this->successResponse([], $message); 
+        }
     }
 
 
@@ -160,7 +168,8 @@ class ServiceController extends Controller
             $service_detail[]=$service;
         }
         
-        return $service_detail;
+        $message= "Service detail gotten successfully!";
+        return $this->successResponse(['service_detail' => $service_detail], $message);
     }
 
      /**
@@ -172,26 +181,38 @@ class ServiceController extends Controller
     public function getService($service_group_id)
     {
         $services = Service::where('service_group_id', $service_group_id)->get();
+
+        $checker = ServiceGroup::select('id')->where('id',$service_group_id)->exists();
+
+        // check if selected service group exists
+        if($checker){
         
-        $service_detail = [];
+            $service_detail = [];
 
-        foreach($services as $service){
+            foreach($services as $service){
 
-            $service['service_group_id'] = $service->service_group_id; 
-            $service['service_name'] = $service->service_name;
-            $service['avatar'] = $service->avatar;
-            $service['service_price'] = $service->service_price;
+                $service['service_group_id'] = $service->service_group_id; 
+                $service['service_name'] = $service->service_name;
+                $service['avatar'] = $service->avatar;
+                $service['service_price'] = $service->service_price;
 
-            // get user details from users table
-            $user = User::findOrFail($service->staff_id);
+                // get user details from users table
+                $user = User::findOrFail($service->staff_id);
 
-            $service['staff_name'] = $user->full_name;
-            $service['updated_at'] = $service->updated_at->format('d M Y');
+                $service['staff_name'] = $user->full_name;
+                $service['updated_at'] = $service->updated_at->format('d M Y');
 
-            $service_detail[]=$service;
+                $service_detail[]=$service;
+            }
+        
+            $message = "Service detail gotten successfully!";
+            return $this->successResponse(['service_detail' => $service_detail], $message);
+        }else{
+           // if selected service group does not exist, display message
+            $message = "Selected service group does not exist or has been deleted!";
+            return $this->successResponse([], $message); 
         }
         
-        return $service_detail;
     }
 
      /**

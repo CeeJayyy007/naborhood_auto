@@ -86,7 +86,7 @@ Route::group([
         Route::post('edit-service/{service_id}', 'ServiceController@editService');
 
         // get all service
-        Route::get('get-service', 'ServiceController@getService');
+        Route::get('get-all-services', 'ServiceController@getAllServices');
 
         // get service
         Route::get('get-service/{service_group_id}', 'ServiceController@getService');

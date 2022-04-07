@@ -111,6 +111,7 @@ class ServiceGroupController extends Controller
             $request->service_group_name? $service_group->service_group_name = ucfirst(strtolower($request->service_group_name)): null;
             $request->file()? $service_group->avatar = $newImageName: null;
             $service_group->save();
+            $message = "Service group updated successfully!";
         }else{
             $message = "Selected user does not exist or has been deleted!";
             return $this->successResponse([], $message);
@@ -119,7 +120,7 @@ class ServiceGroupController extends Controller
         // // update user id on audit table
         // $this->auditRepository->updateUserId($request, $user);
         
-        return $service_group;
+        return $this->successResponse(['service_group' => $service_group], $message);
     }
 
     
@@ -147,9 +148,10 @@ class ServiceGroupController extends Controller
             $service_group['updated_at'] = $serviceGroup->updated_at->format('d M Y');
 
             $service_group_detail[]=$service_group;
+            
         }
-        
-        return $service_group_detail;
+        $message= "Service detail gotten successfully!";
+        return $this->successResponse(['service_group_detail' => $service_group_detail], $message);
     }
 
     /**
