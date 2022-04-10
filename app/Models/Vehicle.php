@@ -19,16 +19,7 @@ class Vehicle extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'user_id',
-        'brand',
-        'model',
-        'year',
-        'number',
-        'colour',
-        'mileage',
-        'vehicle_avatar'
-    ];
+    protected $guarded = ['id'];
 
     /**
      * The accessors to append to the model's array form.

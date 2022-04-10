@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
-class ServiceGroup extends Model
+class RenderedService extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -28,27 +27,24 @@ class ServiceGroup extends Model
     /**
     * Get the user a vehicle belongs to
     */
-    public function user()
+    public function request()
     {
         return $this->belongsToMany('App\Models\User');
     }
 
-
-    /**
-    * Get the service group a service belongs to
+     /**
+    * Get the services that belong to a service group
     */
     public function service()
     {
         return $this->belongsToMany('App\Models\Service');
     }
-
-     /**
-    * Get the rendered services a request belongs to
+    
+    /**
+    * Get the services that belong to a service group
     */
-    public function renderedService()
+    public function serviceGroup()
     {
-        return $this->belongsToMany('App\Models\RenderedService');
+        return $this->belongsToMany('App\Models\ServiceGroup');
     }
-
-
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 
-class ServiceGroup extends Model
+class Request extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -33,22 +33,20 @@ class ServiceGroup extends Model
         return $this->belongsToMany('App\Models\User');
     }
 
-
     /**
-    * Get the service group a service belongs to
+    * Get the services that belong to a service group
     */
-    public function service()
+    public function serviceGroup()
     {
-        return $this->belongsToMany('App\Models\Service');
+        return $this->belongsToMany('App\Models\ServiceGroup');
     }
 
-     /**
+    /**
     * Get the rendered services a request belongs to
     */
     public function renderedService()
     {
         return $this->belongsToMany('App\Models\RenderedService');
     }
-
 
 }

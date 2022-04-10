@@ -15,14 +15,7 @@ class Service extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'staff_id',
-        'service_group_id',
-        'service_name',
-        'service_price',
-        'avatar',
-    ];
-
+    protected $guarded = ['id'];
     /**
      * The accessors to append to the model's array form.
      *
@@ -45,4 +38,13 @@ class Service extends Model
     {
         return $this->belongsToMany('App\Models\ServiceGroup');
     }
+
+     /**
+    * Get the rendered services a request belongs to
+    */
+    public function renderedService()
+    {
+        return $this->belongsToMany('App\Models\RenderedService');
+    }
+
 }
