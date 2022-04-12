@@ -62,7 +62,7 @@ class RequestController extends Controller
         // $newServiceRequest->services()->attach($service);
 
         // Attach status to ServiceRequest
-        // $newServiceRequest->statuses()->attach(Status::where('request_id', $serviceRequest->id)->OrderBy('ServiceRequest')->first());
+        // $newServiceRequest->statuses()->attach(Status::where('request_id', $serviceRequest->id)->ServiceRequestBy('ServiceRequest')->first());
 
         // Create ServiceRequest waybills
         if(isset($request->rendered_services)) {
@@ -109,13 +109,83 @@ class RequestController extends Controller
         ]);
 
         // Update waybill statuses
-        // $wyb->statuses()->attach(Status::where('service_type', $service->type)->orderBy('order')->first(), ['request_id' => $order->id]);
+        // $wyb->statuses()->attach(Status::where('service_type', $service->type)->ServiceRequestBy('ServiceRequest')->first(), ['request_id' => $ServiceRequest->id]);
 
         return $rendSvc;
     }
+
+
+    /**
+     * Update ServiceRequest
+     *
+     * @param   object  $request object
+     * @param   int  $ServiceRequest_no
+     * @return  object
+     */
+    public function updateServiceRequest(Request $request, $service_no)
+    {
+        $ServiceRequest = Request::where('service_no', $service_no)->first();
+        $user = User::findOrFail($request->user_id);
+
+        $ServiceRequest->update([
+            'title' => $request->title,
+            'comment' => $request->extra_comment,
+            'send_address_id' => $send_address_id,
+            // 'receive_address_id' => $address ?? $request->o_address,
+            'receive_address_id' => $receive_address_id,
+            'tracking_number' => null,
+            'distance' => $distance,
+        ]);
+
+        // if service changes, detach old services and attach new services
+        if ($ServiceRequest->services()->first()->id != $request->service) {
+            $ServiceRequest->services()->detach();
+
+            $service = Service::findOrFail($request->service);
+            $relatedService = $service->relatedService()->first();
+
+            $ServiceRequest->services()->attach($service);
+            $ServiceRequest->services()->attach($relatedService);
+            if (isset($local_request)) {
+                $ServiceRequest->services()->attach($local_request);
+            }
+        }
+        else {
+            $service = $ServiceRequest->services->first();
+            $relatedService = $service->relatedService()->first();
+        }
+
+        if($request->submit == "local-ServiceRequest"){
+            $request->waybill_number = array("HGL001");
+            $request->courier_name = array("HUGO");
+        }
+
+        // cancel marked waybills
+        if (isset($request->w_delete)) {
+            $waybill_ids = array_values($request->w_delete);
+            $this->invalidateWaybill($waybill_ids);
+        }
+
+        // update old waybills
+        if ($request->submit == "china-ServiceRequest") {
+            $this->updateWaybills($request, $ServiceRequest, $service, $relatedService, $local_request);
+        }
+
+        // create ServiceRequest waybills
+        if(isset($request->waybill_number)) {
+            foreach($request->waybill_number as $index => $wyb) {
+                $this->storeWaybill($request, $ServiceRequest, $service, $relatedService, $local_request, $index);
+            }
+        }
+
+        // Broadcast Event
+        event(new RequestServiceRequestUpdated($ServiceRequest));
+
+        return $ServiceRequest;
+    }
     
     /**
-     * Generate random number for order_no
+     * Generate random number for ServiceRequest_no
      *
      * @return integer
      */
