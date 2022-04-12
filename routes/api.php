@@ -94,8 +94,17 @@ Route::group([
         // delete service
         Route::get('delete-service/{service_id}', 'ServiceController@deleteService');
 
-       // create new service request
+        // create new service request
         Route::post('new-service-request', 'RequestController@storeRequest');
+
+        // update service request
+        Route::post('update-service-request/{service_no}', 'RequestController@updateServiceRequest');
+
+        // get service request
+        Route::get('get-service-request/{service_no}', 'RequestController@getServiceRequest');
+
+        // get all service request
+        Route::get('get-all-service-requests', 'RequestController@getAllServiceRequests');
  
     });
     Route::get('/home', 'HomeController@index')->name('home');

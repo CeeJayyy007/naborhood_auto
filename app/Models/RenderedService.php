@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 class RenderedService extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -29,7 +28,15 @@ class RenderedService extends Model
     */
     public function request()
     {
-        return $this->belongsToMany('App\Models\User');
+        return $this->belongsToMany('App\Models\Request');
+    }
+
+    /**
+    * Get the user a service request belongs to
+    */
+    public function serviceRequest()
+    {
+        return $this->belongsToMany('App\Models\Request');
     }
 
      /**

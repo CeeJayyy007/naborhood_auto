@@ -121,10 +121,10 @@ class RequestController extends Controller
      */
     public function updateServiceRequest(Request $request, $service_no)
     {
-        $serviceRequest = Request::where('service_no', $service_no)->first();
+        $serviceRequest = ServiceRequest::where('service_no', $service_no)->first();
         $user = User::findOrFail($request->user_id);
 
-        $ServiceRequest->update([
+        $serviceRequest->update([
             'vehicle_id' => $request->vehicle_id,
             'service_note' => $request->service_note,
             'is_done' => $request->is_done,
@@ -133,7 +133,7 @@ class RequestController extends Controller
         // Create ServiceRequest waybills
         if(isset($request->rendered_services)) {
             foreach($request->rendered_services as $index => $rendSvc) {
-                $this->storeRenderedService($request, $newServiceRequest, $user, $index, $rendSvc);
+                $this->storeRenderedService($request, $serviceRequest, $user, $index, $rendSvc);
             }
         }
         
@@ -174,6 +174,64 @@ class RequestController extends Controller
 
         return $rendSvc;
     }
+
+     /**
+     * get service request details
+     *
+     * @return \App\Models\Request
+     */
+    public function getServiceRequest($service_no)
+    {
+        // get service request for selected service_no
+        $serviceRequest = ServiceRequest::where('service_no', $service_no)->first();
+
+        // get rendered services for selected service request
+        $renderedServices = RenderedService::where('request_id', $serviceRequest->id)->get();
+
+        // create new array to hold service request detail
+        $service_request_detail = [];
+
+        // populate array
+        $service_request_detail['service_request'] = $serviceRequest; 
+        $service_request_detail['rendered_services'] = $renderedServices;
+
+        // create success message
+        $message= "Service request and all rendered services obtained successfully!";
+        
+        return $this->successResponse(['service_request_detail' => $service_request_detail], $message);
+    }
+
+
+    /**
+     * get all service request details
+     *
+     * @return \App\Models\Request
+     */
+    public function getAllServiceRequests()
+    {
+        // get service request for selected service_no
+        $serviceRequests = ServiceRequest::all();
+
+        return $serviceRequests;
+
+        // create new array to hold service request detail
+        $service_request_detail = [];
+
+        foreach ($serviceRequests as $serviceRequest){
+            // get rendered services for selected service request
+            $renderedServices = RenderedService::where('request_id', $serviceRequest->id)->get();
+
+            // populate array
+            $service_request_detail['service_request'] = $serviceRequest; 
+            $service_request_detail['rendered_services'] = $renderedServices;
+        }
+
+        // create success message
+        $message= "All service requests and their rendered services obtained successfully!";
+        
+        return $this->successResponse(['service_request_detail' => $service_request_detail], $message);
+    }
+
 
     /**
      * delete a rendered service, rendered service statuses, rendered seervice invoices
