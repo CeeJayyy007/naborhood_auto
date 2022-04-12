@@ -93,9 +93,6 @@ class RequestController extends Controller
      */
     public function storeRenderedService($request, $newServiceRequest, $user, $index = null, $rendSvc)
     {
-
-        // dd($request->rendered_services);
-
         $rendSvc = RenderedService::create([
             "request_id" => $newServiceRequest->id,
             "service_id" => $rendSvc['service_id'],
@@ -119,71 +116,136 @@ class RequestController extends Controller
      * Update ServiceRequest
      *
      * @param   object  $request object
-     * @param   int  $ServiceRequest_no
+     * @param   int  $service_no
      * @return  object
      */
     public function updateServiceRequest(Request $request, $service_no)
     {
-        $ServiceRequest = Request::where('service_no', $service_no)->first();
+        $serviceRequest = Request::where('service_no', $service_no)->first();
         $user = User::findOrFail($request->user_id);
 
         $ServiceRequest->update([
-            'title' => $request->title,
-            'comment' => $request->extra_comment,
-            'send_address_id' => $send_address_id,
-            // 'receive_address_id' => $address ?? $request->o_address,
-            'receive_address_id' => $receive_address_id,
-            'tracking_number' => null,
-            'distance' => $distance,
+            'vehicle_id' => $request->vehicle_id,
+            'service_note' => $request->service_note,
+            'is_done' => $request->is_done,
         ]);
 
-        // if service changes, detach old services and attach new services
-        if ($ServiceRequest->services()->first()->id != $request->service) {
-            $ServiceRequest->services()->detach();
-
-            $service = Service::findOrFail($request->service);
-            $relatedService = $service->relatedService()->first();
-
-            $ServiceRequest->services()->attach($service);
-            $ServiceRequest->services()->attach($relatedService);
-            if (isset($local_request)) {
-                $ServiceRequest->services()->attach($local_request);
+        // Create ServiceRequest waybills
+        if(isset($request->rendered_services)) {
+            foreach($request->rendered_services as $index => $rendSvc) {
+                $this->storeRenderedService($request, $newServiceRequest, $user, $index, $rendSvc);
             }
         }
-        else {
-            $service = $ServiceRequest->services->first();
-            $relatedService = $service->relatedService()->first();
-        }
-
-        if($request->submit == "local-ServiceRequest"){
-            $request->waybill_number = array("HGL001");
-            $request->courier_name = array("HUGO");
-        }
-
-        // cancel marked waybills
-        if (isset($request->w_delete)) {
-            $waybill_ids = array_values($request->w_delete);
-            $this->invalidateWaybill($waybill_ids);
-        }
-
-        // update old waybills
-        if ($request->submit == "china-ServiceRequest") {
-            $this->updateWaybills($request, $ServiceRequest, $service, $relatedService, $local_request);
-        }
-
-        // create ServiceRequest waybills
-        if(isset($request->waybill_number)) {
-            foreach($request->waybill_number as $index => $wyb) {
-                $this->storeWaybill($request, $ServiceRequest, $service, $relatedService, $local_request, $index);
-            }
-        }
-
+        
         // Broadcast Event
-        event(new RequestServiceRequestUpdated($ServiceRequest));
+        // event(new RequestServiceRequestUpdated($serviceRequest));
 
-        return $ServiceRequest;
+        return $serviceRequest;
     }
     
+      /**
+     * Update rendered service
+     *
+     * @param   object  $request object
+     * @param   object  $serviceRequest App\Request object
+     * @return  object  rendered service object
+     */
+    public function updateRenderedService(Request $request, $rendered_service_id)
+    {
+        // updated by user id
+        $user = Auth::user();
+
+        // get details of previously rendered service
+        $rendSvc = RenderedService::findOrFail('$rendered_service_id')->first();
+
+        // update previously rendered service
+        $rendSvc->update([
+            "service_id" => $reqeust->service_id,
+            "service_group_id" => $request->service_group_id, 
+            "price" => $request->price,
+            "quantity" => $request->quantity,
+            "total" => $request->total,
+            "status" => $request->status,
+            "updated_by_id" => $user->id, 
+        ]);
+
+        // Update waybill statuses
+        // $wyb->statuses()->attach(Status::where('service_type', $service->type)->ServiceRequestBy('ServiceRequest')->first(), ['request_id' => $ServiceRequest->id]);
+
+        return $rendSvc;
+    }
+
+    /**
+     * delete a rendered service, rendered service statuses, rendered seervice invoices
+     *
+     * @param   array $rendered_service_ids
+     * @return  bool
+     */
+    public function deleteRenderedService($rendered_service_id)
+    {
+        $rendSvc = RenderedService::findOrFail('rendered_service_id')->first();
+
+        $rendSvc->delete();
+
+        // Waybill::whereIn('waybill_number', $wyb_nums)
+        //             ->update([
+        //                 'tracking_id' => null,
+        //                 'is_valid' => 0,
+        //                 'is_received' => 0,
+        //                 'is_received_date' => null,
+        //                 'is_done' => 0,
+        //             ]);
+
+            // DB::table('waybill_statuses')->whereIn('waybill_id', $waybill_ids)->delete();
+            // DB::table('waybill_invoices')->whereIn('waybill_id', $waybill_ids)->delete();
+    }
+
+    /**
+     * Cancel serviceRequest$serviceRequest, detach all relationships (services, waybills, statuses, invoices)
+     *
+     * @param   int $order_id
+     * @return  void
+     */
+    public function cancelServiceRequest($request_id)
+    {
+        $serviceRequest = Request::where('id', $request_id);
+
+        $renderedServices = RenderedService::where('request_id', $request_id);
+
+        foreach($renderedServices as $renderedService){
+            
+            $renderedService->delete();
+        
+        }
+
+        $serviceRequest->delete();
+
+        $message = "Service Request deleted successfully!";
+
+        // if($is_user) {
+        //     $serviceRequest= $serviceRequest->where('user_id', auth()->user()->id)->first();
+        // } else {
+        //     $serviceRequest= $serviceRequest->first();
+        // }
+
+
+        // if (!$serviceRequest) {
+        //     return null;
+        // }
+
+        // $serviceRequest->invoices()->delete();
+        // $serviceRequest->statuses()->detach();
+        // DB::table('waybill_invoices')->whereIn('waybill_id', $serviceRequest->waybills()->pluck('id')->toArray())->delete();
+        // DB::table('waybill_statuses')->whereIn('waybill_id', $serviceRequest->waybills()->pluck('id')->toArray())->delete();
+        // $serviceRequest->renderedService()->delete();
+
+        // Broadcast event
+        // event(new OrderCancelled($serviceRequest));
+
+        return $this->successResponse([], $message);
+    }
+
+
     /**
      * Generate random number for ServiceRequest_no
      *
