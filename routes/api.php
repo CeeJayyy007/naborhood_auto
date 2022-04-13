@@ -103,8 +103,20 @@ Route::group([
         // get service request
         Route::get('get-service-request/{service_no}', 'RequestController@getServiceRequest');
 
+        // delete service request
+        Route::get('delete-service-request/{service_no}', 'RequestController@deleteServiceRequest');
+
         // get all service request
         Route::get('get-all-service-requests', 'RequestController@getAllServiceRequests');
+
+        // add rendered service to existing service request
+        Route::post('add-rendered-service/{service_no}', 'RequestController@addRenderedService');
+
+        // update rendered service
+        Route::post('update-rendered-service', 'RequestController@updateRenderedService');
+
+        // delete rendered service
+        Route::get('delete-rendered-service/{rendered_service_id}', 'RequestController@deleteRenderedService');
  
     });
     Route::get('/home', 'HomeController@index')->name('home');

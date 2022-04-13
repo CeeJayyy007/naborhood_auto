@@ -143,6 +143,49 @@ class RequestController extends Controller
         return $serviceRequest;
     }
     
+    /**
+     * add new rendered service to service request
+     *
+     * @param   object  $request object
+     * @param   object  $serviceRequest App\Request object
+     * @return  object  rendered service object
+     */
+    public function addRenderedService(Request $request, $service_no)
+    {
+        // updated by user id
+        $user = Auth::user();
+
+        // get details from existing service request
+        $serviceRequest = ServiceRequest::where('service_no', $service_no)->first();
+
+        // get newwly rendered_services array
+        $rendered_services = $request->rendered_services;
+        
+        // create records of each rendered services in the array
+        foreach ($rendered_services as $rendered_service){
+            // dd($rendered_service['service_id']);
+            
+            // create and add new rendered service to previously created service request
+            $rendSvc = RenderedService::create([
+                "request_id" => $serviceRequest->id,
+                "service_id" => $rendered_service['service_id'],
+                "service_group_id" => $rendered_service['service_group_id'], 
+                "price" => $rendered_service['price'],
+                "quantity" => $rendered_service['quantity'],
+                "total" => $rendered_service['total'],
+                "status" => 0,
+                "updated_by_id" => $user->id, 
+                "created_by_id" => $user->id,
+            ]);
+            
+        }
+        // Update waybill statuses
+        // $wyb->statuses()->attach(Status::where('service_type', $service->type)->ServiceRequestBy('ServiceRequest')->first(), ['request_id' => $ServiceRequest->id]);
+
+        return $rendSvc;
+    }
+
+
       /**
      * Update rendered service
      *
@@ -150,17 +193,17 @@ class RequestController extends Controller
      * @param   object  $serviceRequest App\Request object
      * @return  object  rendered service object
      */
-    public function updateRenderedService(Request $request, $rendered_service_id)
+    public function updateRenderedService(Request $request)
     {
         // updated by user id
         $user = Auth::user();
 
         // get details of previously rendered service
-        $rendSvc = RenderedService::findOrFail('$rendered_service_id')->first();
+        $rendSvc = RenderedService::findOrFail($request->rendered_service_id);
 
         // update previously rendered service
         $rendSvc->update([
-            "service_id" => $reqeust->service_id,
+            "service_id" => $request->service_id,
             "service_group_id" => $request->service_group_id, 
             "price" => $request->price,
             "quantity" => $request->quantity,
@@ -241,21 +284,13 @@ class RequestController extends Controller
      */
     public function deleteRenderedService($rendered_service_id)
     {
-        $rendSvc = RenderedService::findOrFail('rendered_service_id')->first();
+        $rendSvc = RenderedService::findOrFail($rendered_service_id);
 
         $rendSvc->delete();
 
-        // Waybill::whereIn('waybill_number', $wyb_nums)
-        //             ->update([
-        //                 'tracking_id' => null,
-        //                 'is_valid' => 0,
-        //                 'is_received' => 0,
-        //                 'is_received_date' => null,
-        //                 'is_done' => 0,
-        //             ]);
-
-            // DB::table('waybill_statuses')->whereIn('waybill_id', $waybill_ids)->delete();
-            // DB::table('waybill_invoices')->whereIn('waybill_id', $waybill_ids)->delete();
+        $message = "Selected rendered service deleted successfully!";
+        
+        return $this->successResponse([], $message);
     }
 
     /**
@@ -264,11 +299,11 @@ class RequestController extends Controller
      * @param   int $order_id
      * @return  void
      */
-    public function cancelServiceRequest($request_id)
+    public function deleteServiceRequest($service_no)
     {
-        $serviceRequest = Request::where('id', $request_id);
+        $serviceRequest = ServiceRequest::where('service_no', $service_no)->first();
 
-        $renderedServices = RenderedService::where('request_id', $request_id);
+        $renderedServices = RenderedService::where('request_id', $serviceRequest->id)->get();
 
         foreach($renderedServices as $renderedService){
             

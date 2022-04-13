@@ -46,6 +46,14 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Vehicle');
     }
 
+    /**
+     * Get the inventory items created by a user.
+     */
+    public function inventory()
+    {
+        return $this->belongsToMany('App\Models\Inventory');
+    }
+
 
     /**
      * Get the service groups owned by a user.
