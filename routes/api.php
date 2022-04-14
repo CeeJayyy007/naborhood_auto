@@ -117,7 +117,17 @@ Route::group([
 
         // delete rendered service
         Route::get('delete-rendered-service/{rendered_service_id}', 'RequestController@deleteRenderedService');
- 
+
+        // add item to inventory
+        Route::post('inventory/add-item', 'InventoryController@addItem');
+
+        // edit item in inventory
+        Route::post('inventory/edit-item', 'InventoryController@editItem');
+
+        // add stock to inventory item
+        Route::post('inventory/add-stock', 'InventoryController@addStock');
+
     });
+   
     Route::get('/home', 'HomeController@index')->name('home');
 });
