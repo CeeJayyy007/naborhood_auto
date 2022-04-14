@@ -44,9 +44,13 @@ class InventoryController extends Controller
         // created by and updated by user id
         $user = Auth::user();
 
+        // create inventory item number
+        $item_number = str_replace('-', '', now()->toDateString()) . mt_rand(1000, 9999);
+
         // Create new item
         $addItem = $inventory->create([
             'item_name' => $request->item_name,
+            'item_number' => 'NAP'.$item_number,
             'cost_price' => $request->cost_price,
             'actual_price' => $request->actual_price,
             'quantity_added' => $request->quantity,
@@ -82,6 +86,7 @@ class InventoryController extends Controller
         // Create new item
         $addStock = $inventory->create([
             'item_name' => $inventory_item->item_name,
+            'item_number' => $inventory_item->item_number,
             'cost_price' => $inventory_item->cost_price,
             'actual_price' => $inventory_item->actual_price,
             'quantity_added' => $request->quantity,
@@ -111,6 +116,7 @@ class InventoryController extends Controller
         // Create new item
         $inventory_item->update([
             'item_name' => $request->item_name,
+            'item_number' => $inventory_item->item_number,
             'cost_price' => $request->cost_price,
             'actual_price' => $request->actual_price,
             'quantity_added' => 0,
@@ -123,8 +129,29 @@ class InventoryController extends Controller
 
         $message = "Inventory item editted successfully!";
 
-        return $this->successResponse(["addStock" => $inventory_item], $message);
+        return $this->successResponse(["inventory_item" => $inventory_item], $message);
     }
 
+    /**
+     * delete inventory item
+     *
+     * @param   int $item_number
+     * @return  void
+     */
+    public function deleteItem($item_number)
+    {
+        // get inventory item to delete from inventory table using item_number
+        $inventory_items = Inventory::where('item_number', $item_number)->get();
+
+        foreach($inventory_items as $inventory_item){
+            
+            $inventory_item->delete();
+        
+        }
+
+        $message = "Inventory Item deleted successfully!";
+
+        return $this->successResponse([], $message);
+    }
 
 }

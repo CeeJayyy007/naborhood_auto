@@ -127,6 +127,8 @@ Route::group([
         // add stock to inventory item
         Route::post('inventory/add-stock', 'InventoryController@addStock');
 
+        // delete inventory item
+        Route::get('inventory/delete-item/{item_number}', 'InventoryController@deleteItem');
     });
    
     Route::get('/home', 'HomeController@index')->name('home');
