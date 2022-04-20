@@ -133,6 +133,39 @@ class InventoryController extends Controller
     }
 
     /**
+     * get inventory item history
+     *
+     * @return \App\Models\Inventory
+     */
+    public function getItemHistory($item_number)
+    {
+        // get inventory item history for selected item_number
+        $item_history = Inventory::where('item_number', $item_number)->orderBy('created_at', 'DESC')->get();
+
+        // create success message
+        $message= "Item history retrieved successfully!";
+        
+        return $this->successResponse(['item_history' => $item_history], $message);
+    }
+
+    /**
+     * get all items from invenroty
+     *
+     * @return \App\Models\Inventory
+     */
+    public function getAllInventoryItems()
+    {
+        // get service request for selected service_no
+        $inventory_items = Inventory::where('item_number', '!=', "")->distinct()->orderBy('created_at', 'DESC')->get();
+
+        // create success message
+        $message= "Inventory items list retrieved successfully!";
+        
+        return $this->successResponse(['inventory items' => $inventory_items], $message);
+    }
+
+
+    /**
      * delete inventory item
      *
      * @param   int $item_number

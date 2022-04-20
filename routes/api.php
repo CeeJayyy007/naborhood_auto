@@ -121,6 +121,12 @@ Route::group([
         // add item to inventory
         Route::post('inventory/add-item', 'InventoryController@addItem');
 
+        // get inventory item history
+        Route::get('inventory/get-item-history/{item_number}', 'InventoryController@getItemHistory');
+
+        // get all inventory items 
+        Route::get('inventory/get-all-items', 'InventoryController@getAllInventoryItems');
+
         // edit item in inventory
         Route::post('inventory/edit-item', 'InventoryController@editItem');
 
