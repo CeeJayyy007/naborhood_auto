@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use App\Models\User;
@@ -156,7 +157,9 @@ class InventoryController extends Controller
     public function getAllInventoryItems()
     {
         // get service request for selected service_no
-        $inventory_items = Inventory::where('item_number', '!=', "")->distinct()->orderBy('created_at', 'DESC')->get();
+        $data = Inventory::where('item_number', '!=', "")->get();
+
+        $inventory_items = collect($data)->unique('item_number')->all();
 
         // create success message
         $message= "Inventory items list retrieved successfully!";
