@@ -157,7 +157,7 @@ class InventoryController extends Controller
     public function getAllInventoryItems()
     {
         // get service request for selected service_no
-        $data = Inventory::where('item_number', '!=', "")->get();
+        $data = Inventory::where('item_number', '!=', "")->orderBy('created_at', 'DESC')->get();
 
         $inventory_items = collect($data)->unique('item_number')->all();
 
