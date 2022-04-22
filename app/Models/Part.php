@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\Carbon;
 
-class Request extends Model
+class Part extends Model
 {
-    use HasFactory, SoftDeletes;
+     use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -33,28 +31,20 @@ class Request extends Model
         return $this->belongsToMany('App\Models\User');
     }
 
-    /**
-    * Get the services that belong to a service group
-    */
-    public function serviceGroup()
-    {
-        return $this->belongsToMany('App\Models\ServiceGroup');
-    }
-
+    
     /**
     * Get the rendered services a request belongs to
     */
-    public function renderedService()
+    public function request()
     {
-        return $this->belongsToMany('App\Models\RenderedService');
+        return $this->belongsToMany('App\Models\Request');
     }
 
     /**
-     * Get the parts assigned to a request.
-     */
-    public function part()
+    * Get the inventory items that match the parts
+    */
+    public function inventory()
     {
-        return $this->belongsToMany('App\Models\Part');
+        return $this->belongsToMany('App\Models\Inventory');
     }
-
 }

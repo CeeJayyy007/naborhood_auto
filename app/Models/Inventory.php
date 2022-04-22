@@ -40,4 +40,12 @@ class Inventory extends Model
     {
         return $this->belongsToMany('App\Models\RenderedService');
     }
+
+    /**
+     * Get the parts matching an inventory item.
+     */
+    public function part()
+    {
+        return $this->belongsToMany('App\Models\Inventory');
+    }
 }

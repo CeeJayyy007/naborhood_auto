@@ -54,6 +54,14 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Models\Inventory');
     }
 
+     /**
+     * Get the parts assigned by a user.
+     */
+    public function part()
+    {
+        return $this->belongsToMany('App\Models\Part');
+    }
+
 
     /**
      * Get the service groups owned by a user.

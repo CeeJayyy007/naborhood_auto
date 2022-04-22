@@ -135,6 +135,9 @@ Route::group([
 
         // delete inventory item
         Route::get('inventory/delete-item/{item_number}', 'InventoryController@deleteItem');
+
+        // add part to service request
+        Route::post('request/add-part', 'PartController@addPartToRequest');
     });
    
     Route::get('/home', 'HomeController@index')->name('home');
