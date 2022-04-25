@@ -138,6 +138,9 @@ Route::group([
 
         // add part to service request
         Route::post('request/add-part', 'PartController@addPartToRequest');
+
+        // edit part added to a service request
+        Route::post('request/edit-part', 'PartController@editAssignedPart');
     });
    
     Route::get('/home', 'HomeController@index')->name('home');
