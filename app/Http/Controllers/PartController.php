@@ -76,8 +76,6 @@ class PartController extends Controller
         // created by and updated by user id
         $user = Auth::user();
 
-        dd($assigned_part_update);
-
         // edit assigned part record 
         $assigned_part_update->update([
             'rendered_service_id' => $request->rendered_service_id,
@@ -93,9 +91,9 @@ class PartController extends Controller
             'updated_by_id' => $user->id,
         ]);
 
-        $message = "Inventory item edited successfully!";
+        $message = "Added part edited successfully!";
 
-        return $this->successResponse(["inventory_item" => $assigned_part_update, "rendered_service" => $rendered_service], $message);
+        return $this->successResponse(["assigned_part_update" => $assigned_part_update, "rendered_service" => $rendered_service], $message);
     }
 
 }

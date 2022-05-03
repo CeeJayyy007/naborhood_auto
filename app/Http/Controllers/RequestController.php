@@ -172,7 +172,7 @@ class RequestController extends Controller
                 "service_group_id" => $rendered_service['service_group_id'], 
                 "price" => $rendered_service['price'],
                 "quantity" => $rendered_service['quantity'],
-                "total" => $rendered_service['total'],
+                "total" => $rendered_service['price'] * $rendered_service['quantity'],
                 "status" => 0,
                 "updated_by_id" => $user->id, 
                 "created_by_id" => $user->id,
@@ -207,7 +207,7 @@ class RequestController extends Controller
             "service_group_id" => $request->service_group_id, 
             "price" => $request->price,
             "quantity" => $request->quantity,
-            "total" => $request->total,
+            "total" => $request->price * $request->quantity,
             "status" => $request->status,
             "updated_by_id" => $user->id, 
         ]);
